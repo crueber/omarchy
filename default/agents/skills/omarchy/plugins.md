@@ -54,13 +54,8 @@ allocation in a process the user cannot afford to have balloon.
 
 - `FileView` (`Quickshell.Io`) reads the *entire* file before any code can
   validate or reject it. Do not use it for user-writable files.
-- Read such files with a bounded `Process` instead: read at most one byte over
-  the hard cap (e.g. `timeout 5 head -c 65537 -- "$path"` for a 64 KiB cap)
-  and reject output over the cap. A preliminary `stat -c%s` can fast-reject an
-  oversized file, but cannot enforce the bound because the file may change.
-- Bound the in-memory model too. A file under the byte cap can still hold a
-  huge array — cap collection counts (dice lists, side lists, rows) to a sane
-  maximum while parsing.
+- Read such files with a bounded `Process` instead: read at most one byte over the hard cap (e.g. `timeout 5 head -c 65537 -- "$path"` for a 64 KiB cap) and reject a non-zero exit or output over the cap. Measure the output in bytes (`StdioCollector.data.byteLength`), not `text.length`, which counts UTF-16 code units and undercounts anything non-ASCII. A preliminary `stat -c%s` can fast-reject an oversized file, but cannot enforce the bound because the file may change.
+- Bound the in-memory model too. A file under the byte cap can still hold a huge array — cap collection counts (list entries, rows) to a sane maximum before populating the UI model.
 
 ## Idle and Lock
 
